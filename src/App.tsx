@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import "./App.css";
 
 interface Position {
@@ -8,73 +8,79 @@ interface Position {
 
 function App() {
   const [card, setCard] = useState([
-    [0, 3, 1],
-    [2, 5, 4],
-    [5, 0, 4],
-    [1, 2, 3],
+    [
+      { value: 0, found: false },
+      { value: 3, found: false },
+      { value: 1, found: false },
+    ],
+    [
+      { value: 2, found: false },
+      { value: 5, found: false },
+      { value: 4, found: false },
+    ],
+    [
+      { value: 5, found: false },
+      { value: 0, found: false },
+      { value: 4, found: false },
+    ],
+    [
+      { value: 1, found: false },
+      { value: 2, found: false },
+      { value: 3, found: false },
+    ],
   ]);
 
-  const [checkCard, setCheckCard] = useState(
-    new Array(card.length).fill(new Array(card[0].length).fill("false"))
-  );
+  const [position, setPosition] = useState<Position[]>([]);
 
-  const [pair, setPair] = useState<number[]>([]);
-  const [firstPosition, setFirstPosition] = useState<Position>();
+  useMemo(() => {
+    console.log("Position: ", position);
+    if (position.length === 2) {
+      let firstNumber = card[position[0].x][position[0].y].value;
+      let secondNumber = card[position[1].x][position[1].y].value;
+
+      if (firstNumber === secondNumber) {
+        const toggleValueFromCheckCard = [...card];
+
+        toggleValueFromCheckCard[position[0].x][position[0].y].found = true;
+        toggleValueFromCheckCard[position[1].x][position[1].y].found = true;
+
+        setCard(toggleValueFromCheckCard);
+
+        console.log("Encontrou um par!");
+      }
+      setPosition([]);
+    }
+  }, [position]);
 
   const handleCardClicked = (value: number, x: number, y: number) => {
-    if (pair.length < 2 && firstPosition === undefined) {
-      setPair([...pair, value]);
-      setFirstPosition({ x, y });
-    } else if (
-      pair.length < 2 &&
-      firstPosition !== undefined &&
+    if (position.length === 0) {
+      setPosition([...position, { x, y }]);
+    }
+    if (
+      position.length !== 0 &&
       !(
-        Object.entries(firstPosition).toString() ===
+        Object.entries(position[0]).toString() ===
         Object.entries({ x, y }).toString()
       )
     ) {
-      setPair([...pair, value]);
+      setPosition([...position, { x, y }]);
     }
-    if (pair.length === 2) {
-      if (pair[0] === pair[1]) {
-        const toggleValueFromCheckCard = [...checkCard];
-        //console.log(checkCard);
-        console.log(firstPosition!.x, " - ", firstPosition!.y);
-
-        toggleValueFromCheckCard[firstPosition!.x][firstPosition!.y] = "true";
-        console.log(toggleValueFromCheckCard);
-        toggleValueFromCheckCard[x][y] = true;
-        console.log(
-          toggleValueFromCheckCard[firstPosition!.x][firstPosition!.y]
-        );
-
-        console.log(toggleValueFromCheckCard[x][y]);
-        console.log(toggleValueFromCheckCard);
-
-        setCheckCard(toggleValueFromCheckCard);
-
-        //console.log(checkCard);
-
-        console.log("Encontrou um par!", pair[0], pair[1], pair[0] === pair[1]);
-      }
-      setPair([]);
-      setFirstPosition(undefined);
-    }
-    console.log(pair, " - ", firstPosition);
   };
 
   return (
     <div className="App">
       {card.map((row, rowIndex) => (
         <div id="page" key={rowIndex}>
-          {row.map((value, columnIndex) => (
+          {row.map((cel, columnIndex) => (
             <div
-              onClick={() => handleCardClicked(value, rowIndex, columnIndex)}
+              onClick={() =>
+                handleCardClicked(cel.value, rowIndex, columnIndex)
+              }
               id="card"
               key={columnIndex}
             >
               {" "}
-              {value}{" "}
+              {cel.found && cel.value}{" "}
             </div>
           ))}{" "}
         </div>
