@@ -29,11 +29,10 @@ function App() {
       { value: 3, found: false },
     ],
   ]);
-
+  const [cont, setCont] = useState<number>(0);
   const [position, setPosition] = useState<Position[]>([]);
 
   useMemo(() => {
-    console.log("Position: ", position);
     if (position.length === 2) {
       let firstNumber = card[position[0].x][position[0].y].value;
       let secondNumber = card[position[1].x][position[1].y].value;
@@ -45,10 +44,15 @@ function App() {
         toggleValueFromCheckCard[position[1].x][position[1].y].found = true;
 
         setCard(toggleValueFromCheckCard);
-
-        console.log("Encontrou um par!");
+        setCont(cont + 1);
       }
+
       setPosition([]);
+    }
+    if (cont === 6) {
+      setTimeout(() => {
+        alert("Você venceu!!");
+      }, 500);
     }
   }, [position]);
 
